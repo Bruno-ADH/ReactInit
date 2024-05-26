@@ -1,110 +1,56 @@
-
-
-
 import './css/bootstrap.css';
-import { Input } from './components/forms/Input.jsx';
-import { Checkbox } from './components/forms/Checkbox';
-import { ProductRow } from './components/products/ProductRow.jsx';
-import { ProductCategoryRow } from './components/products/ProductCategroryRow.jsx';
-import { useEffect, useState } from 'react';
-import { Range } from './components/forms/range.jsx';
-import { ErrorBoundary } from 'react-error-boundary';
-// import { ErrorBoundary } from './components/ErrorBoundary.jsx';
-
-const PRODUCTS = [
-    { category: "Fruits", price: "$1", stocked: true, name: "Apple" },
-    { category: "Fruits", price: "$1", stocked: true, name: "Dragonfruit" },
-    { category: "Fruits", price: "$2", stocked: false, name: "Passionfruit" },
-    { category: "Vegetables", price: "$2", stocked: true, name: "Spinach" },
-    { category: "Vegetables", price: "$4", stocked: false, name: "Pumpkin" },
-    { category: "Vegetables", price: "$1", stocked: true, name: "Peas" }
-];
-
+import { useTodos } from './hooks/useTodos';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faTrashCan } from '@fortawesome/free-solid-svg-icons';
 
 function App() {
-    const [showStockedOnly, setshowStockedOnly] = useState(false)
-    const [range, setrange] = useState(0)
-    const [search, setsearch] = useState('')
-
-    const visibleProducts = PRODUCTS.filter((product) => {
-        if (showStockedOnly && !product.stocked) {
-            return false
-        }
-
-        if (range && !product.price.includes(range)) {
-            return false
-        }
-
-        if (search && !product.name.toLocaleUpperCase().includes(search.toLocaleUpperCase())) {
-            return false
-        }
-        return true
-    })
-    console.log('range :>> ', range);
-
-    return <div className="container my-3 g-2">
-        <SearchBar search={search} onsearch={setsearch} showStockedOnly={showStockedOnly} onshowStockedOnlyChange={setshowStockedOnly} range={range} onrange={setrange} />
-
-        <ErrorBoundary
-            FallbackComponent={AlertError}
-            onReset={() => console.log('object :>> ')}
+    const {visibleTodos, removeTodo, toggleTodo, toggleFilter, showCompleted, clearCompleted} = useTodos()
+    
+    return <div className="container">
+        {visibleTodos.length < 1 ? (<div
+            className="alert text-center alert-primary m-5"
+            role="alert"
         >
-            <ProductTable products={visibleProducts} />
-        </ErrorBoundary>
-    </div>
-}
+           Aucune <strong>Tâche</strong> 
+        </div>)
 
-function AlertError ({error, resetErrorBoundary}) {
-    return <div className='alert alert-danger mt-3' role="alert">    
-        {error.toString()}
-        <button type='reset' className="btn btn-secondary ms-3" onClick={resetErrorBoundary}>Reset</button>
-    </div>
-}
+            :
+            (<>
+                <div className='mt-4 form-check'>
+                    <input className="form-check-input" 
+                    type="checkbox" 
+                    onChange={toggleFilter}
+                    checked={showCompleted}
+                    id="checkbox" />
+                    <label className="form-check-label" htmlFor="checkbox"> Afficher les tâches accomplie</label>
+                </div>
 
-function SearchBar({ showStockedOnly, onshowStockedOnlyChange, search, onsearch, range, onrange }) {
-    return <div className="">
-        <Input value={search} onChange={onsearch} placeholder="Rechercher..." />
-        <Range value={range} onChange={onrange} />
-        <Checkbox id="stocked"
-            checked={showStockedOnly}
-            onCheck={onshowStockedOnlyChange}
-            label="N'afficher que les produits en stock" />
-    </div>
-}
-
-function ProductTable({ products }) {
-    const rows = []
-    let lastCategory = null
-
-    products.forEach(product => {
-        if (product.category !== lastCategory) {
-            rows.push(<ProductCategoryRow key={product.category} name={product.category} />)
+                <ul className="list-group mt-2">
+                    {visibleTodos.map((todo) => (
+                    <li className="d-flex justify-content-between align-items-center  list-group-item"
+                        key={todo.name}
+                    >
+                        <input className="form-check-input me-5" type="checkbox" onChange={(e)=>toggleTodo(todo)} checked={todo.checked} />
+                        <span className='me-5'>{todo.name}</span>
+                        <button 
+                         type='button' 
+                         style={{
+                            visibility: (todo.checked)? 'visible' : 'hidden',
+                            opacity: (todo.checked)? 1 : 0,
+                            transition: 'opacity 1s ease'
+                         }}
+                         className='btn btn-danger' onClick={(e) => removeTodo(todo)} ><FontAwesomeIcon icon={faTrashCan} /></button>
+                    </li>))}
+                </ul>
+                <button
+                    hidden={visibleTodos.length >= 1 ? false : true}
+                    type="button"
+                    className="btn btn-outline-success mt-3"
+                    onClick={clearCompleted}
+                >
+                    Supprimer les tâches accomplies
+                </button></>)
         }
-        lastCategory = product.category
-        rows.push(<ProductRow product={product} key={product.name} />)
-    });
-
-    return <div
-        className="table-responsive mt-4"
-    >
-        <table
-            className="table table-light"
-        >
-            <thead>
-                <tr>
-                    <th scope="col">Nom</th>
-                    <th scope="col">Prix</th>
-                </tr>
-            </thead>
-            <tbody>
-                {(rows.length < 1) ?
-                    <tr>
-                        <td colSpan={2} className="fw-semibold fs-3 text-center text-success">vide</td>
-                    </tr>
-                    :
-                    rows}
-            </tbody>
-        </table>
     </div>
 }
 

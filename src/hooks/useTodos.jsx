@@ -22,7 +22,7 @@ export function todosReducer(state, action) {
     if (action.type === 'CLEAR_COMPLETED') {
         return {
             ...state,
-            todos: state.todos.filter((todo) => todo.checked === true ? false : true)
+            todos: state.todos.filter((todo) => !todo.checked)
         }
     }
 

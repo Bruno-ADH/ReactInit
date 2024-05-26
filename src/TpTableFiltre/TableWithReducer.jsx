@@ -1,5 +1,7 @@
 import './css/bootstrap.css';
 import { useTodos } from './hooks/useTodos';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faTrashCan } from '@fortawesome/free-solid-svg-icons';
 
 function App() {
     const {visibleTodos, removeTodo, toggleTodo, toggleFilter, showCompleted, clearCompleted} = useTodos()
@@ -37,7 +39,7 @@ function App() {
                             opacity: (todo.checked)? 1 : 0,
                             transition: 'opacity 1s ease'
                          }}
-                         className='btn btn-danger' onClick={(e) => removeTodo(todo)} >Supprimer</button>
+                         className='btn btn-danger' onClick={(e) => removeTodo(todo)} ><FontAwesomeIcon icon={faTrashCan} /></button>
                     </li>))}
                 </ul>
                 <button
