@@ -1,0 +1,16 @@
+body{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.bounceAnime {
+    text-shadow: 0 1px 6px rgba(33, 37, 41, 0.5);
+    animation: bounce 6s ease-out infinite alternate;
+}
+
+@keyframes bounce {
+    to{
+        translate: 0 -20px;
+    }
+}
