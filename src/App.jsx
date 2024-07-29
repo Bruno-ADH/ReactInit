@@ -1,7 +1,9 @@
-import { createBrowserRouter, Link, NavLink, Outlet, RouterProvider, useRouteError } from 'react-router-dom';
+import { createBrowserRouter, defer, Link, NavLink, Outlet, RouterProvider, useNavigate, useNavigation, useRouteError } from 'react-router-dom';
 import './css/bootstrap.css';
 import './css/style.css'
 import { Single } from './pages/Single';
+import { Data } from '../post';
+import { Blog } from './pages/Blog';
 
 const router = createBrowserRouter([
     {
@@ -11,7 +13,28 @@ const router = createBrowserRouter([
         children: [
             {
                 path: 'blog',
-                element: <Single />
+                element: <div className="row">
+                    <aside className='col-3'>
+                        <h2>Sidebar</h2>
+                    </aside>
+                    <main className='col-9'>
+                        <Outlet/>
+                    </main>
+                </div>,
+                children: [
+                    {
+                        path: '',
+                        element: <Blog/>,
+                        loader: () => {
+                            const data = Data()
+                           return defer({data})
+                        }
+                    },
+                    {
+                        path: ':id',
+                        element: <Single/>
+                    }
+                ]
             },
             {
                 path: 'contact',
@@ -36,6 +59,8 @@ function PageError() {
 }
 
 function Root() {
+    const {state} = useNavigation()
+    console.log('state :>> ', state);
     return <>
         <header>
             <nav
@@ -48,6 +73,10 @@ function Root() {
             </nav>
         </header>
         <div className="container my-4">
+            {state === 'loading' && <div className="spinner-border text-primary" role="status">
+              <span className="visually-hidden">Loading...</span>
+            </div>
+            }
             <Outlet />
         </div>
     </>
